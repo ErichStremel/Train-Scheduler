@@ -1,0 +1,11 @@
+#employee-table th, td {
+  display: inline-block;
+  width: 19.775%;
+}
+
+.jumbotron  {
+    /* background-image: url(./unionstation.jpg); */
+    background-color: black; 
+    color: white
+}
+
