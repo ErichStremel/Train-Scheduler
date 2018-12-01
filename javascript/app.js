@@ -23,21 +23,13 @@ $("#add-train-btn").on("click", function (event) {
     var trainFreq = $("#frequency-input").val().trim(); // attach a specified format?
 
     //create a local "temporary" object for holding employee data
-
-    var newTrain = {
-        name: trainName,
-        destination: desName,
-        time: trainTime,
-        frequency: trainFreq,
-    };
-
+    database.ref().push({
+        train: trainName,
+        where: desName,
+        start: trainTime,
+        often: trainFreq
+    });
     //uploads employee data to the database
-    database.ref().push(newTrain);
-
-    console.log(newTrain.name);
-    console.log(newTrain.destination);
-    console.log(newTrain.time);
-    console.log(newTrain.frequency);
 
     alert("New destination added.")
 
@@ -47,77 +39,26 @@ $("#add-train-btn").on("click", function (event) {
     $("#frequency-input").val("");
 
 
-})
-
-// on click button that adds the Train
-$("#add-train-button").on("click", function (event) {
-    event.preventDefault();
-
-    // grabs the user input
-    var trainName = $("#train-name-input").val().trim();
-    var desName = $("#destination-input").val().trim();
-    var trainTime = moment($("#time-input").val().trim(), "HH:mm").subtract(10,"years").format("X"); // attach a specified format?
-    var trainFreq = $("#frequency-input").val().trim(); // attach a specified format?
-
-    console.log(trainTime);
-    //create a local "temporary" object for holding employee data
-
-    var newTrain = {
-        name: trainName,
-        destination: desName,
-        time: trainTime,
-        frequency: trainFreq,
-    };
-
-    //uploads employee data to the database
-    database.ref().push(newTrain);
-
-    // console.log(newtrain.name);
-    // console.log(newTrain.destination);
-    // console.log(newtrain.time);
-    // console.log(newTrain.frequency);
-
-    alert("New destination added.")
-
-    // clears text boxes
-    $("#train-name-input").val("");
-    $("#destination-input").val("");
-    $("#time-input").val("");
-    $("#frequency-input").val("");
 });
 
 // Create Firebade event for adding train to the database and a new row in the html 
 database.ref().on("child_added", function (childSnapshot) {
     // console.log(childSnapshot.val());
 
-    // store variables
-    var trainName = childSnapshot.val().name;
-    var desName = childSnapshot.val().destination;
-    var trainTime = childSnapshot.val().time;
-    var trainFreq = childSnapshot.val().frequency;
+    // store variables/ do calculations
+    var startConverted = moment(childSnapshot.val().start, "HH:mm").subtract(1, "days");
+    var diffTime = moment().diff(moment(startConverted), "minutes");
+    var tFrequency = childSnapshot.val().often;
+    var tRemainder = diffTime % tFrequency;
+    var minsAway = tFrequency - tRemainder;
 
-    // console.log(trainName);
-    // console.log(desName);
-    // console.log(trainTime);
-    // console.log(trainFreq);
+    console.log("diffTime: " + diffTime)
+    var nextArrival = moment().add(minsAway, "minutes").format("hh:mm");
 
 
-    // calculations for train times******
-
-    // var = 
-
-    // var = 
-
-  // new row creation
-
-    $("#schedule-table > tbody").append($("<tr>")
-    .append($("<td>").text(trainName),
-    $("<td>").text(desName),
-    $("<td>").text("TBD"),
-    $("<td>").text("TBD"),
-    $("<td>").text("TBD")));
-
+    // append the row to the table
+    $("tbody").append("<tr><td>" + childSnapshot.val().train + "</td><td>" + childSnapshot.val().where + "<td>" + childSnapshot.val().often + "<td>" + nextArrival + "<td>" + minsAway);
 
     //append the new row to the table
-   
+
 });
